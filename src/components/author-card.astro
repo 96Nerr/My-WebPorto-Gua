@@ -20,7 +20,7 @@ const socialLinks: SocialLink[] = [
   author.data.github && { href: author.data.github, label: 'GitHub' },
   author.data.twitter && { href: author.data.twitter, label: 'Twitter' },
   author.data.linkedin && { href: author.data.linkedin, label: 'LinkedIn' },
-  author.data.mail && { href: `mailto:${author.data.mail}`, label: 'Email' },
+  author.data.mail && { href: `https://mail.google.com/mail/?view=cm&fs=1&to=${author.data.mail}`, label: 'Email' },
 ].filter(Boolean) as SocialLink[]
 ---
 
