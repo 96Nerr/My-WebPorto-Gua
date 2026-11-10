@@ -1,718 +1,324 @@
-<!DOCTYPE html>
+---
+const cards = Array.from({ length: 36 })
+---
+
+<!doctype html>
 <html lang="en">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <title>Nerr</title>
-
-  <link
-    href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap"
-    rel="stylesheet"
-  />
-
-  <style>
-
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    html,
-    body {
-      width: 100%;
-      height: 100%;
-    }
-
-    body {
-      overflow: hidden;
-      background: #222831;
-      font-family: "JetBrains Mono", monospace;
-    }
-
-    /* =====================================================
-       HOME PREVIEW
-       ===================================================== */
-
-    .home-preview {
-      position: fixed;
-      inset: 0;
-
-      z-index: 5;
-
-      background: #222831;
-
-      opacity: 0;
-      visibility: hidden;
-
-      overflow: hidden;
-
-      transition: opacity 0.3s ease;
-    }
-
-    .home-preview.active {
-      opacity: 1;
-      visibility: visible;
-    }
-
-    .home-preview iframe {
-      width: 100%;
-      height: 100%;
-
-      border: none;
-      display: block;
-    }
-
-    /* =====================================================
-       REVEAL
-       ===================================================== */
-
-    .reveal {
-      position: fixed;
-      inset: 0;
-
-      z-index: 1;
-
-      background: #948979;
-
-      opacity: 0;
-
-      pointer-events: none;
-
-      transition: opacity 0.3s ease;
-    }
-
-    .reveal.active {
-      opacity: 1;
-    }
-
-    /* =====================================================
-       CAT
-       ===================================================== */
-
-    .cat {
-      position: absolute;
-
-      left: 50%;
-      top: 50%;
-
-      width: 600px;
-
-      transform: translate(-50%, -50%);
-
-      opacity: 0;
-
-      transition: opacity 0.3s ease;
-
-      z-index: 2;
-    }
-
-    .reveal.active .cat {
-      opacity: 0.95;
-    }
-
-    /* =====================================================
-       GRID
-       ===================================================== */
-
-    .grid {
-      position: fixed;
-      inset: 0;
-
-      z-index: 10;
-
-      display: grid;
-
-      grid-template-columns: repeat(6, 1fr);
-      grid-template-rows: repeat(6, 1fr);
-
-      gap: 4px;
-
-      padding: 4px;
-
-      perspective: 1500px;
-    }
-
-    /* =====================================================
-       CARD
-       ===================================================== */
-
-    .card {
-      position: relative;
-
-      width: 100%;
-      height: 100%;
-
-      perspective: 1000px;
-
-      cursor: pointer;
-
-      /* Transisi untuk efek menghilang saat card-hidden aktif */
-      transition:
-        opacity 0.17s ease var(--delay, 0s),
-        transform 0.4s cubic-bezier(0.16, 1, 0.3, 1) var(--delay, 0s);
-    }
-
-    .card-inner {
-      position: relative;
-
-      width: 100%;
-      height: 100%;
-
-      transform-style: preserve-3d;
-
-      transition:
-        transform 0.55s
-        cubic-bezier(0.16, 1, 0.3, 1);
-
-      transition-delay: var(--delay, 0s);
-    }
-
-    /* =====================================================
-       HOVER
-       ===================================================== */
-
-    .grid:not(.clicked)
-    .card:hover
-    .card-inner {
-      transform: rotateX(180deg);
-      transition-delay: 0s !important;
-    }
-
-    /* =====================================================
-       CLICKED
-       ===================================================== */
-
-    .grid.clicked
-    .card-inner {
-      transform: rotateX(180deg);
-    }
-
-    /* =====================================================
-       HOVER SAAT SUDAH CLICKED
-       ===================================================== */
-
-    .grid.clicked
-    .card:hover
-    .card-inner {
-
-      transform: rotateX(0deg);
-
-      transition-delay: 0s !important;
-    }
-
-    /* =====================================================
-       CARD KELUAR (FLIP & FADE OUT)
-       ===================================================== */
-
-    .card.card-hidden {
-      opacity: 0;
-      transform: scale(0.7) rotateX(90deg);
-      pointer-events: none;
-    }
-
-    /* =====================================================
-       FRONT / BACK
-       ===================================================== */
-
-    .card-front,
-    .card-back {
-
-      position: absolute;
-
-      inset: 0;
-
-      border-radius: 8px;
-
-      backface-visibility: hidden;
-      -webkit-backface-visibility: hidden;
-    }
-
-    /* =====================================================
-       FRONT
-       ===================================================== */
-
-    .card-front {
-
-      background:
-        linear-gradient(
-          135deg,
-          #222831,
-          #393E46
-        );
-
-      border:
-        1px solid
-        rgba(148, 137, 121, 0.4);
-
-      box-shadow:
-        inset 0 0 25px
-        rgba(148, 137, 121, 0.05);
-
-      transition:
-        border-color 0.3s ease,
-        box-shadow 0.3s ease;
-    }
-
-    .card-front::before {
-
-      content: "";
-
-      position: absolute;
-
-      inset: 0;
-
-      background:
-        linear-gradient(
-          90deg,
-          transparent 49%,
-          rgba(223, 208, 184, 0.08) 50%,
-          transparent 51%
-        ),
-        linear-gradient(
-          0deg,
-          transparent 49%,
-          rgba(223, 208, 184, 0.08) 50%,
-          transparent 51%
-        );
-    }
-
-    /* =====================================================
-       HOVER GLOW
-       ===================================================== */
-
-    .grid:not(.clicked)
-    .card:hover
-    .card-front,
-
-    .grid.clicked
-    .card:hover
-    .card-front {
-
-      border-color: #DFD0B8;
-
-      box-shadow:
-        0 0 20px
-        rgba(223, 208, 184, 0.25),
-
-        inset 0 0 25px
-        rgba(223, 208, 184, 0.1);
-    }
-
-    /* =====================================================
-       BACK
-       ===================================================== */
-
-    .card-back {
-
-      transform: rotateX(180deg);
-
-      background: #393E46;
-
-      border:
-        1px solid
-        rgba(34, 40, 49, 0.65);
-
-      box-shadow:
-        inset 0 0 15px
-        rgba(34, 40, 49, 0.2);
-    }
-
-    /* =====================================================
-       BACK CLICKED
-       ===================================================== */
-
-    .grid.clicked
-    .card-back {
-
-      background:
-        linear-gradient(
-          135deg,
-          #393E46,
-          #222831
-        );
-
-      border-color:
-        rgba(223, 208, 184, 0.25);
-
-      box-shadow:
-        inset 0 0 20px
-        rgba(223, 208, 184, 0.08);
-    }
-
-    /* =====================================================
-       PROFILE
-       ===================================================== */
-
-    .profile {
-
-      position: fixed;
-
-      left: 50%;
-      top: 50%;
-
-      width: 475px;
-
-      padding: 38px 40px;
-
-      transform:
-        translate(-50%, -50%)
-        translateY(25px)
-        scale(0.92);
-
-      background: #222831;
-
-      border:
-        1px solid
-        rgba(148, 137, 121, 0.3);
-
-      border-radius: 18px;
-
-      box-shadow:
-        0 25px 60px
-        rgba(0, 0, 0, 0.5),
-
-        0 0 30px
-        rgba(34, 40, 49, 0.5);
-
-      display: flex;
-
-      flex-direction: column;
-
-      align-items: center;
-
-      opacity: 0;
-
-      z-index: 30;
-
-      pointer-events: none;
-
-      transition:
-        opacity 0.3s cubic-bezier(0.16, 1, 0.3, 1),
-        transform 0.3s cubic-bezier(0.16, 1, 0.3, 1);
-    }
-
-    .profile.active {
-
-      opacity: 1;
-
-      transform:
-        translate(-50%, -50%)
-        translateY(0)
-        scale(1);
-
-      pointer-events: auto;
-    }
-
-    .profile.fade-out {
-
-      opacity: 0;
-
-      transform:
-        translate(-50%, -50%)
-        scale(0.92);
-
-      pointer-events: none;
-    }
-
-    /* =====================================================
-       PROFILE IMAGE
-       ===================================================== */
-
-    .profile-image {
-
-      width: 88px;
-      height: 88px;
-
-      object-fit: cover;
-
-      border-radius: 50%;
-
-      border:
-        2px solid #948979;
-
-      box-shadow:
-        0 0 10px
-        rgba(148, 137, 121, 0.7),
-
-        0 0 25px
-        rgba(223, 208, 184, 0.2);
-
-      margin-bottom: 18px;
-    }
-
-    /* =====================================================
-       PROFILE TEXT
-       ===================================================== */
-
-    .profile h1 {
-
-      color: #DFD0B8;
-
-      font-size: 27px;
-
-      margin-bottom: 10px;
-
-      letter-spacing: 1px;
-    }
-
-    .profile p {
-
-      color: #948979;
-
-      font-size: 14px;
-
-      line-height: 1.8;
-
-      text-align: center;
-
-      margin-bottom: 25px;
-    }
-
-    /* =====================================================
-       BUTTON
-       ===================================================== */
-
-    .enter {
-
-      text-decoration: none;
-
-      color: #222831;
-
-      background: #DFD0B8;
-
-      padding: 13px 34px;
-
-      border-radius: 30px;
-
-      font-size: 14px;
-
-      font-weight: 700;
-
-      transition:
-        background 0.25s ease,
-        transform 0.25s ease,
-        box-shadow 0.25s ease,
-        color 0.25s ease;
-    }
-
-    .enter:hover {
-
-      background: #948979;
-
-      color: #DFD0B8;
-
-      transform:
-        translateY(-2px);
-
-      box-shadow:
-        0 8px 25px
-        rgba(148, 137, 121, 0.4);
-    }
-
-    /* =====================================================
-       SCANLINES
-       ===================================================== */
-
-    body::after {
-
-      content: "";
-
-      position: fixed;
-
-      inset: 0;
-
-      z-index: 100;
-
-      pointer-events: none;
-
-      background:
-        repeating-linear-gradient(
-          to bottom,
-          transparent 0px,
-          transparent 3px,
-          rgba(223, 208, 184, 0.012) 4px
-        );
-    }
-
-    /* =====================================================
-       MOBILE
-       ===================================================== */
-
-    @media (max-width: 700px) {
-
-      .profile {
-
-        width: 85vw;
-
-        padding: 30px 25px;
-      }
-
-      .cat {
-        width: 90vw;
-      }
-
-      .grid {
-
-        gap: 3px;
-
-        padding: 3px;
-      }
-    }
-
-  </style>
-</head>
-
-<body>
-
-  <!-- HOME PREVIEW -->
-  <div class="home-preview" id="homePreview">
-    <iframe src="/home" title="Home Preview"></iframe>
-  </div>
-
-  <!-- REVEAL -->
-  <section class="reveal" id="reveal">
-    <img src="/ilustrasi-kucing.png" alt="" class="cat" />
-  </section>
-
-  <!-- PROFILE -->
-  <div class="profile" id="profile">
-    <img
-      src="https://images.unsplash.com/photo-1528642474498-1af0c17fd8c3?q=80&w=200&auto=format&fit=crop"
-      alt="Profile"
-      class="profile-image"
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="theme-color" content="#222831" />
+    <meta name="description" content="Portfolio of Nerr, informatics student and CTF player." />
+    <title>Nerr</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link
+      href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;700&display=swap"
+      rel="stylesheet"
     />
-    <h1>Nerr</h1>
-    <p>
-      Computer Science Student
-      <br />
-      Active CTF Player
-    </p>
-    <a href="/home" class="enter" id="enterBtn">Enter Site</a>
-  </div>
 
-  <!-- GRID 6 x 6 -->
-  <main class="grid" id="grid">
-    <!-- ROW 1 -->
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <!-- ROW 2 -->
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <!-- ROW 3 -->
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <!-- ROW 4 -->
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <!-- ROW 5 -->
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <!-- ROW 6 -->
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-    <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
-  </main>
+    <style>
+      * { margin: 0; padding: 0; box-sizing: border-box; }
+      html, body { width: 100%; height: 100%; }
 
-  <script>
-    
-
-    const grid = document.getElementById("grid");
-    const reveal = document.getElementById("reveal");
-    const profile = document.getElementById("profile");
-    const enterBtn = document.getElementById("enterBtn");
-    const homePreview = document.getElementById("homePreview");
-
-    let timeoutId = null;
-
-    const cards = Array.from(document.querySelectorAll(".card"));
-
-    function assignRandomGroupDelays() {
-      const shuffled = [...cards].sort(() => Math.random() - 0.5);
-      
-      shuffled.forEach((card, index) => {
-        const group = Math.floor(index / 6); 
-        const delay = group * 0.05 + (Math.random() * 0.02);
-        card.style.setProperty("--delay", `${delay}s`);
-      });
-    }
-
-    assignRandomGroupDelays();
-
-    /* GRID CLICK */
-    grid.addEventListener("click", () => {
-      if (grid.dataset.leaving === "true") return;
-
-      if (grid.classList.contains("clicked")) {
-        grid.classList.remove("clicked");
-        cards.forEach(card => card.classList.remove("card-hidden"));
-        reveal.classList.remove("active");
-        profile.classList.remove("active");
-        clearTimeout(timeoutId);
-        return;
+      body {
+        /* Palet: Charcoal, Slate, Taupe, Sand */
+        --bg: #222831;
+        --surface: #393e46;
+        --muted: #948979;
+        --accent: #dfd0b8;
+        --profile-y: 66%; /* posisi vertikal kartu profil; 50% = tepat di tengah */
+        overflow: hidden;
+        background: var(--bg);
+        font-family: "JetBrains Mono", monospace;
       }
 
-      assignRandomGroupDelays();
-      grid.classList.add("clicked");
+      /* ---------- PREVIEW /home ---------- */
+      .home-preview {
+        position: fixed; inset: 0; z-index: 5;
+        background: var(--bg);
+        opacity: 0; visibility: hidden; pointer-events: none;
+        transition: opacity 0.3s ease, visibility 0s 0.3s;
+      }
+      .home-preview.active {
+        opacity: 1; visibility: visible;
+        transition: opacity 0.3s ease;
+      }
+      .home-preview iframe { width: 100%; height: 100%; border: 0; display: block; }
 
-      timeoutId = setTimeout(() => {
-        reveal.classList.add("active");
-        profile.classList.add("active");
-      }, 220);
-    });
+      /* ---------- GRID ---------- */
+      .grid {
+        --flip: 0.7s;
+        --exit: 0.5s;
+        position: fixed; inset: 0; z-index: 10;
+        display: grid;
+        grid-template: repeat(6, 1fr) / repeat(6, 1fr);
+        gap: 4px; padding: 4px;
+        perspective: 1500px;
+        cursor: pointer;
+        outline: none;
+      }
+      .grid:focus-visible { outline: 2px solid var(--accent); outline-offset: -2px; }
+      .grid[data-state="leaving"] { pointer-events: none; }
 
-    /* ENTER SITE */
-    enterBtn.addEventListener("click", (event) => {
-      event.preventDefault();
-      event.stopPropagation();
+      .card { position: relative; perspective: 1000px; }
 
-      grid.dataset.leaving = "true";
+      .card-inner {
+        position: relative; width: 100%; height: 100%;
+        transform-style: preserve-3d;
+        will-change: transform;
+        transition: transform var(--flip) cubic-bezier(0.65, 0, 0.35, 1) var(--delay, 0s);
+      }
 
-      profile.classList.add("fade-out");
-      reveal.classList.remove("active");
-      homePreview.classList.add("active");
+      .grid[data-state="open"] .card-inner,
+      .grid[data-state="leaving"] .card-inner { transform: rotateX(180deg); }
 
-      // Gunakan delay grouping yang sama, lalu tambahkan kelas card-hidden secara berurutan sesuai delay
-      assignRandomGroupDelays();
+      @media (hover: hover) {
+        .grid[data-state="idle"] .card:hover .card-inner { transform: rotateX(180deg); transition-delay: 0s; }
+        .grid[data-state="open"] .card:hover .card-inner { transform: rotateX(0deg); transition-delay: 0s; }
+        .card:hover .card-front::after { opacity: 1; }
+      }
 
-      cards.forEach(card => {
-        const delayStr = card.style.getPropertyValue("--delay");
-        const delayMs = parseFloat(delayStr) * 1000;
+      .card-front, .card-back {
+        position: absolute; inset: 0;
+        border-radius: 8px;
+        backface-visibility: hidden;
+        -webkit-backface-visibility: hidden;
+      }
 
-        setTimeout(() => {
-          card.classList.add("card-hidden");
-        }, delayMs);
-      });
+      /* papan = warna body (--bg); kartu depan sedikit lebih terang agar terbaca */
+      .card-front {
+        background: linear-gradient(135deg, var(--surface), color-mix(in srgb, var(--surface) 70%, var(--bg)));
+        border: 1px solid rgba(148, 137, 121, 0.4);
+      }
+      /* glow lewat opacity (murah), bukan transisi box-shadow */
+      .card-front::after {
+        content: ""; position: absolute; inset: -1px; border-radius: inherit;
+        border: 1px solid var(--accent);
+        box-shadow: 0 0 20px rgba(223, 208, 184, 0.25), inset 0 0 25px rgba(223, 208, 184, 0.1);
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
 
-      // Redirect setelah seluruh kartu selesai ber-flip dan menghilang
-      setTimeout(() => {
-        window.location.href = enterBtn.getAttribute("href");
-      }, 850);
-    });
-  </script>
-</body>
+      .card-back {
+        transform: rotateX(180deg);
+        background-color: var(--muted);
+        background-repeat: no-repeat; /* potongan gambar kucing diisi lewat JS */
+        border: 1px solid rgba(223, 208, 184, 0.25);
+      }
+
+      /* ---------- KELUAR ---------- */
+      .grid[data-state="leaving"] .card {
+        opacity: 0;
+        transform: scale(0.7) rotateX(90deg);
+        transition:
+          opacity calc(var(--exit) * 0.6) ease var(--delay, 0s),
+          transform var(--exit) cubic-bezier(0.4, 0, 0.2, 1) var(--delay, 0s);
+      }
+
+      /* ---------- PROFIL ---------- */
+      .profile {
+        position: fixed; left: 50%; top: var(--profile-y); z-index: 30;
+        width: min(475px, 88vw);
+        padding: 38px 40px;
+        display: flex; flex-direction: column; align-items: center;
+        background: var(--bg);
+        border: 1px solid rgba(148, 137, 121, 0.3);
+        border-radius: 18px;
+        box-shadow: 0 25px 60px rgba(0, 0, 0, 0.5);
+        opacity: 0; pointer-events: none;
+        transform: translate(-50%, -50%) translateY(24px) scale(0.94);
+        transition:
+          opacity 0.45s cubic-bezier(0.22, 1, 0.36, 1),
+          transform 0.45s cubic-bezier(0.22, 1, 0.36, 1);
+      }
+      .profile.active {
+        opacity: 1; pointer-events: auto;
+        transform: translate(-50%, -50%) translateY(0) scale(1);
+      }
+      .profile.fade-out {
+        opacity: 0; pointer-events: none;
+        transform: translate(-50%, -50%) scale(0.94);
+      }
+      .profile-image {
+        width: 88px; height: 88px; object-fit: cover; border-radius: 50%;
+        border: 2px solid var(--muted);
+        box-shadow: 0 0 10px rgba(148, 137, 121, 0.7), 0 0 25px rgba(223, 208, 184, 0.2);
+        margin-bottom: 18px;
+      }
+      .profile h1 { color: var(--accent); font-size: 27px; margin-bottom: 10px; letter-spacing: 1px; }
+      .profile p { color: var(--muted); font-size: 14px; line-height: 1.8; text-align: center; margin-bottom: 25px; }
+
+      .enter {
+        text-decoration: none; font-size: 14px; font-weight: 700;
+        color: var(--bg); background: var(--accent);
+        padding: 13px 34px; border-radius: 30px;
+        transition: background 0.25s ease, color 0.25s ease, transform 0.25s ease;
+      }
+      .enter:hover, .enter:focus-visible {
+        background: var(--muted); color: var(--accent); transform: translateY(-2px);
+      }
+
+      /* ---------- SCANLINES ---------- */
+      body::after {
+        content: ""; position: fixed; inset: 0; z-index: 100; pointer-events: none;
+        background: repeating-linear-gradient(
+          to bottom, transparent 0, transparent 3px, rgba(223, 208, 184, 0.012) 4px
+        );
+      }
+
+      /* layar pendek: kembali ke tengah supaya kartu tidak terpotong */
+      @media (max-height: 640px) { body { --profile-y: 50%; } }
+
+      @media (max-width: 700px) {
+        .profile { padding: 30px 25px; }
+        .grid { gap: 3px; padding: 3px; }
+      }
+      @media (prefers-reduced-motion: reduce) {
+        .profile, .home-preview { transition-duration: 0.01s; }
+      }
+    </style>
+  </head>
+
+  <body>
+    <div class="home-preview" id="homePreview" aria-hidden="true">
+      <iframe data-src="/home" title="Home Preview" tabindex="-1"></iframe>
+    </div>
+
+    <div class="profile" id="profile" inert>
+      <!-- ganti dengan foto sendiri, mis. /profile.jpg di folder public -->
+      <img
+        src="https://media0.giphy.com/media/v1.Y2lkPTc5MGI3NjExdGkzNG1lZWRyamZncmM2MTNweWRuczh1dzRnMzBucHJjdmx6N243NCZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/0z9PvS61OIh6dZz20e/giphy.gif"
+        alt="Profile"
+        class="profile-image"
+      />
+      <h1>Nerr</h1>
+      <p>Computer Science Student<br />Active CTF Player</p>
+      <a href="/home" class="enter" id="enterBtn">Enter Site</a>
+    </div>
+
+    <main class="grid" id="grid" data-state="idle" role="button" tabindex="0" aria-label="Open the cards">
+      {cards.map(() => (
+        <div class="card"><div class="card-inner"><div class="card-front"></div><div class="card-back"></div></div></div>
+      ))}
+    </main>
+
+    <script>
+      const FLIP = 0.7 // detik, samakan dengan --flip di CSS
+      const EXIT = 0.5 // detik, samakan dengan --exit di CSS
+      const STEP = 0.06 // jeda antar "cincin" gelombang
+      const JITTER = 0.04 // acak halus supaya terlihat organik
+      const COLS = 6
+      const k = matchMedia('(prefers-reduced-motion: reduce)').matches ? 0 : 1
+
+      const grid = document.getElementById('grid') as HTMLElement
+      const profile = document.getElementById('profile') as HTMLElement
+      const enterBtn = document.getElementById('enterBtn') as HTMLAnchorElement
+      const preview = document.getElementById('homePreview') as HTMLElement
+      const frame = preview.querySelector('iframe') as HTMLIFrameElement
+      const cards = Array.from(grid.querySelectorAll<HTMLElement>('.card'))
+
+      // Setiap sisi belakang kartu menampilkan potongan gambar kucing yang sama,
+      // sehingga saat semua kartu terbalik gambarnya tersusun utuh di atas "papan".
+      const CAT_SRC = '/ilustrasi-kucing.png'
+      const catImg = new Image()
+      function layoutCat() {
+        if (!catImg.naturalWidth) return
+        const w = Math.min(600, innerWidth * 0.9)
+        const h = (w * catImg.naturalHeight) / catImg.naturalWidth
+        const left = (innerWidth - w) / 2
+        const top = (innerHeight - h) / 2
+        cards.forEach((card) => {
+          const r = card.getBoundingClientRect()
+          const back = card.querySelector<HTMLElement>('.card-back')!
+          back.style.backgroundImage = `url(${CAT_SRC})`
+          back.style.backgroundSize = `${w}px ${h}px`
+          back.style.backgroundPosition = `${left - r.left}px ${top - r.top}px`
+        })
+      }
+      catImg.onload = layoutCat
+      catImg.src = CAT_SRC
+      addEventListener('resize', layoutCat)
+
+      const timers: number[] = []
+      const later = (fn: () => void, ms: number) => {
+        timers.push(window.setTimeout(fn, ms))
+      }
+      const clearTimers = () => timers.splice(0).forEach(clearTimeout)
+
+      // Gelombang menyebar dari kartu asal (baris r0, kolom c0); mengembalikan delay terbesar (detik)
+      function ripple(r0: number, c0: number) {
+        let max = 0
+        cards.forEach((card, i) => {
+          const d = (Math.hypot(Math.floor(i / COLS) - r0, (i % COLS) - c0) * STEP + Math.random() * JITTER) * k
+          card.style.setProperty('--delay', `${d.toFixed(3)}s`)
+          if (d > max) max = d
+        })
+        return max
+      }
+
+      // iframe dimuat setelah animasi buka selesai, supaya tidak bersaing dengan animasi
+      function loadPreview() {
+        if (!frame.src && frame.dataset.src) frame.src = frame.dataset.src
+      }
+
+      function reset() {
+        grid.dataset.state = 'idle'
+        profile.classList.remove('active', 'fade-out')
+        profile.inert = true
+        preview.classList.remove('active')
+      }
+
+      function open(origin: HTMLElement | null, viaKey: boolean) {
+        const i = origin ? cards.indexOf(origin) : -1
+        const max = i >= 0 ? ripple(Math.floor(i / COLS), i % COLS) : ripple(2.5, 2.5)
+        const total = max + FLIP * k
+        grid.dataset.state = 'open'
+        later(() => {
+          profile.classList.add('active')
+          profile.inert = false
+          if (viaKey) enterBtn.focus({ preventScroll: true })
+        }, total * 600)
+        later(loadPreview, total * 1000 + 300)
+      }
+
+      function close() {
+        clearTimers()
+        ripple(2.5, 2.5)
+        reset()
+      }
+
+      grid.addEventListener('click', (e) => {
+        if (grid.dataset.state === 'leaving') return
+        if (grid.dataset.state === 'open') return close()
+        open((e.target as HTMLElement).closest<HTMLElement>('.card'), false)
+      })
+
+      grid.addEventListener('keydown', (e) => {
+        if (e.target !== grid || (e.key !== 'Enter' && e.key !== ' ')) return
+        e.preventDefault()
+        if (grid.dataset.state === 'open') close()
+        else if (grid.dataset.state === 'idle') open(null, true)
+      })
+
+      enterBtn.addEventListener('click', (e) => {
+        e.preventDefault()
+        if (grid.dataset.state === 'leaving') return
+        clearTimers()
+        loadPreview()
+        const max = ripple(2.5, 2.5)
+        grid.dataset.state = 'leaving'
+        profile.classList.add('fade-out')
+        profile.inert = true
+        preview.classList.add('active')
+        // pindah halaman tepat setelah kartu terakhir selesai menghilang
+        later(() => { window.location.href = enterBtn.href }, (max + EXIT * k) * 1000 + 100)
+      })
+
+      // tombol Back dari /home: kembalikan gate ke kondisi awal
+      window.addEventListener('pageshow', (e) => {
+        if (e.persisted) { clearTimers(); reset() }
+      })
+    </script>
+  </body>
 </html>

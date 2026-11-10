@@ -24,6 +24,12 @@ export default defineConfig({
   integrations: [mdx(), react(), sitemap(), icon()],
   vite: {
     plugins: [tailwindcss()],
+    server: {
+      watch: {
+        usePolling: true,
+        interval: 1000 // Memaksa pengecekan perubahan kode setiap 1 detik
+      }
+    }
   },
   server: {
     port: 1234,

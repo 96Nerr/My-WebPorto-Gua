@@ -68,5 +68,9 @@
         }
       }
     ]
+  },
+  "allowScripts": {
+    "esbuild": true,
+    "sharp": true
   }
 }
